@@ -22,11 +22,19 @@ assert t.shape == (2, 2)
 
 ## Features
 
-* [x] max
-* [x] min
-* [x] mean
-* [x] std
-* [x] var
-* [x] sum
-* [x] median
-* [ ] percentile
+* max
+* min
+* mean
+* std
+* var
+* sum
+* median
+* percentile
+* cv
+* abs\_mean
+* abs\_max
+* abs\_min
+* abs\_std
+* intensity
+* zcr
+
