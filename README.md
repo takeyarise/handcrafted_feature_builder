@@ -7,7 +7,7 @@ handcrafted feature builder
 ```python
 x = np.random.rand(2, 3, 10)
 builder = HandcraftedFeatureBuilder(target_axis=-1)
-builder = builder.Max().Min()
+builder = builder.max().min()
 trans = builder.build()
 t = trans(x)
 assert t.shape == (2, 3, 2)
