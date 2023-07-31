@@ -1,6 +1,7 @@
 from typing import Optional
 from functools import partial, wraps
 import numpy as np
+import scipy.stats as stats
 
 
 __all__ = ["HandcraftedFeatureBuilder"]
@@ -82,6 +83,91 @@ def sum(x, axis):
 @register_process
 def median(x, axis):
     return np.median(x, axis=axis, keepdims=True)
+
+
+@register_process
+def skew(x, axis):
+    res = stats.skew(x, axis=axis)
+    return np.expand_dims(res, axis=axis)
+
+
+@register_process
+def kurt(x, axis):
+    res = stats.kurtosis(x, axis=axis)
+    return np.expand_dims(res, axis=axis)
+
+
+@register_process
+def iqr(x, axis):
+    """interquartile range
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    q75, q25 = np.percentile(x, q=[75, 25], axis=axis, keepdims=True)
+    return q75 - q25
+
+
+@register_process
+def mad(x, axis):
+    """median absolute deviation
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    return np.median(np.abs(x - np.median(x, axis=axis, keepdims=True)), axis=axis, keepdims=True)
+
+
+@register_process
+def mad_std(x, axis):
+    """std of median absolute deviation
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    return np.std(np.abs(x - np.median(x, axis=axis, keepdims=True)), axis=axis, keepdims=True)
+
+
+@register_process
+def rms(x, axis):
+    """root mean square
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    return np.sqrt(np.mean(x ** 2, axis=axis, keepdims=True))
+
+
+@register_process
+def range(x, axis):
+    """range
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    return np.max(x, axis=axis, keepdims=True) - np.min(x, axis=axis, keepdims=True)
+
+
+@register_process
+def max_min_ratio(x, axis):
+    """max-min ratio
+
+    Parameters
+    ----------
+    x: np.ndarray
+    axis: int
+    """
+    return np.max(x, axis=axis, keepdims=True) / np.min(x, axis=axis, keepdims=True)
 
 
 @register_process
@@ -182,6 +268,25 @@ def intensity(x, axis):
     """
     src = np.abs(np.diff(x, axis=axis))  # n-1 される
     return np.mean(src, axis=axis, keepdims=True)
+
+
+@register_process
+def entropy(x, axis):
+    """entropy
+
+    $$
+    p_i = \frac{x_i}{\sum_{i=1}^{n}x_i} \\
+    -\sum_{i=1}^{n}p_i\log p_i
+    $$
+
+    Parameters
+    ----------
+    x: np.ndarray
+        all elements must be positive.
+    axis: int
+    """
+    src = x / np.sum(x, axis=axis, keepdims=True)
+    return -np.sum(src * np.log(src), axis=axis, keepdims=True)
 
 
 @register_process
